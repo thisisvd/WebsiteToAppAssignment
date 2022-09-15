@@ -7,7 +7,9 @@ import android.view.View
 import android.webkit.WebBackForwardList
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import com.example.websitetoappassignment.R
 import com.example.websitetoappassignment.databinding.ActivityMainBinding
 
@@ -35,13 +37,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getBackForwardList() {
+    // get pages history in web-view
+    private fun getWebViewHistoryList() {
         val currentList: WebBackForwardList = binding.webView.copyBackForwardList()
         val currentSize = currentList.size
         for (i in 0 until currentSize) {
             val item = currentList.getItemAtIndex(i)
             val url = item.url
-            Log.d(TAG, "The URL at index: " + Integer.toString(i) + " is " + url)
+            Log.d(TAG, "The URL at index: $i is $url")
         }
     }
 
@@ -92,7 +95,6 @@ class MainActivity : AppCompatActivity() {
                         }
                         R.id.nav_pricing -> {
                             loadUrl("https://www.webtonative.com/pricing")
-                            getBackForwardList()
                             true
                         }
                         else -> false
@@ -101,6 +103,11 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    // on back pressing
+    override fun onBackPressed() {
+        Toast.makeText(this,"Press Again to Exit",Toast.LENGTH_SHORT).show()
     }
 
 }
