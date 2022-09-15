@@ -1,16 +1,14 @@
-package com.example.websitetoappassignment.ui
+package com.example.websitetoappassignment
 
-import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
-import android.webkit.WebBackForwardList
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
-import com.example.websitetoappassignment.R
 import com.example.websitetoappassignment.databinding.ActivityMainBinding
 
 
@@ -21,6 +19,12 @@ class MainActivity : AppCompatActivity() {
 
     // View Binding
     private lateinit var binding: ActivityMainBinding
+
+    // temp var for back click
+    private var isBackClickTwice = false
+
+    // timer
+    private var timer: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,17 +41,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // get pages history in web-view
-    private fun getWebViewHistoryList() {
-        val currentList: WebBackForwardList = binding.webView.copyBackForwardList()
-        val currentSize = currentList.size
-        for (i in 0 until currentSize) {
-            val item = currentList.getItemAtIndex(i)
-            val url = item.url
-            Log.d(TAG, "The URL at index: $i is $url")
-        }
-    }
-
     // web view setup
     private fun webViewSetup() {
         binding.apply {
@@ -61,13 +54,59 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 }
+
+                // some configs
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
+
+                // load first url as default
                 loadUrl("https://www.webtonative.com")
             }
 
-
         }
+    }
+
+    // on back pressed
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (event!!.action === KeyEvent.ACTION_DOWN) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_BACK -> {
+                    if (binding.webView.canGoBack()) {
+                        binding.webView.goBack()
+                        isBackClickTwice = false
+                    } else {
+                        if (isBackClickTwice) {
+                            finish()
+                        } else {
+                            Toast.makeText(this, "Press Again to Exit", Toast.LENGTH_SHORT).show()
+                            isBackClickTwice = true
+                            startTimer()
+                        }
+                    }
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    // start timer
+    private fun startTimer(){
+        if(timer != null) {
+            timer!!.cancel()
+        }
+
+        timer = object: CountDownTimer(2000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                Log.d(TAG,millisUntilFinished.toString())
+            }
+
+            override fun onFinish() {
+                isBackClickTwice = false
+            }
+        }
+
+        timer!!.start()
     }
 
     // bottom navigation view
@@ -100,14 +139,8 @@ class MainActivity : AppCompatActivity() {
                         else -> false
                     }
                 }
-
             }
         }
-    }
-
-    // on back pressing
-    override fun onBackPressed() {
-        Toast.makeText(this,"Press Again to Exit",Toast.LENGTH_SHORT).show()
     }
 
 }
